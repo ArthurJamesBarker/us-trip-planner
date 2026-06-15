@@ -10,7 +10,24 @@ A shared trip planning list for New York and Washington DC. Rate activities, add
 - **Share a link** — both people see updates within 5 seconds
 - **Filter by category** and minimum rating to narrow down your shortlist
 
-## Quick start
+## Deploy online (share with Dad)
+
+**GitHub repo:** https://github.com/ArthurJamesBarker/us-trip-planner
+
+### One-click deploy to Render (free)
+
+1. Open this link: https://render.com/deploy?repo=https://github.com/ArthurJamesBarker/us-trip-planner
+2. Sign in with **GitHub**
+3. Click **Apply** (uses the `render.yaml` in the repo — no settings to change)
+4. Wait ~3 minutes for the build to finish
+5. Open your live URL (e.g. `https://us-trip-planner.onrender.com`)
+6. Click **Share with Dad** and send him the link
+
+Both of you use the same URL with `?trip=...` to see the same list.
+
+**Note:** On the free tier the app sleeps after 15 min of no use — first visit may take ~30 seconds to wake up.
+
+## Quick start (local)
 
 ```bash
 npm install

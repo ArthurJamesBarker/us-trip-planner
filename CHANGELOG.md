@@ -2,6 +2,10 @@
 
 ## 2026-06-15
 
+- Pushed project to GitHub and added Render one-click deploy config for online sharing.
+
+## 2026-06-15
+
 - Changed activity layout from card grid to horizontal list rows for easier scanning.
 
 ## 2026-06-15
