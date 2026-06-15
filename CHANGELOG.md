@@ -6,7 +6,7 @@
 
 ## 2026-06-15
 
-- Changed activity layout from card grid to horizontal list rows for easier scanning.
+- Added separate star ratings for Me and Dad, with a top section showing items you both rated 5 stars.
 
 ## 2026-06-15
 
