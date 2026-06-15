@@ -2,7 +2,7 @@
 
 ## 2026-06-15
 
-- Pushed project to GitHub and added Render one-click deploy config for online sharing.
+- Pinned Node.js to version 20 for Render deployment (fixes better-sqlite3 build on Node 26).
 
 ## 2026-06-15
 
