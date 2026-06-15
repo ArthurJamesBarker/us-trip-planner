@@ -125,11 +125,11 @@ app.patch("/api/trips/:id/items/:itemId", (req, res) => {
   if (rating === undefined || rating < 0 || rating > 5) {
     return res.status(400).json({ error: "Rating must be 0–5" });
   }
-  if (user !== "me" && user !== "dad") {
-    return res.status(400).json({ error: "User must be 'me' or 'dad'" });
+  if (user !== "arthur" && user !== "me" && user !== "dad") {
+    return res.status(400).json({ error: "User must be 'arthur' or 'dad'" });
   }
 
-  const column = user === "me" ? "rating_me" : "rating_dad";
+  const column = user === "dad" ? "rating_dad" : "rating_me";
   const result = db
     .prepare(`UPDATE items SET ${column} = ? WHERE id = ? AND trip_id = ?`)
     .run(rating, req.params.itemId, req.params.id);

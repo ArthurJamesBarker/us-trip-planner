@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import StarRating from "./components/StarRating";
 import AddItemForm from "./components/AddItemForm";
 import ItemCard from "./components/ItemCard";
 
@@ -26,8 +25,14 @@ function setTripIdInUrl(id) {
   window.history.replaceState({}, "", url);
 }
 
+function normalizeUser(stored) {
+  if (!stored || stored === "me") return null;
+  if (stored === "arthur" || stored === "dad") return stored;
+  return null;
+}
+
 function getStoredUser() {
-  return localStorage.getItem("tripUser");
+  return normalizeUser(localStorage.getItem("tripUser"));
 }
 
 function storeUser(user) {
@@ -168,17 +173,26 @@ export default function App() {
 
   if (!currentUser) {
     return (
-      <div className="user-pick-screen">
-        <h1>Who are you?</h1>
-        <p>Pick your name so your ratings are saved separately from Dad's.</p>
-        <div className="user-pick-buttons">
-          <button className="user-pick-btn" onClick={() => selectUser("me")}>
-            Me
-          </button>
-          <button className="user-pick-btn dad" onClick={() => selectUser("dad")}>
-            Dad
-          </button>
+      <div className="app">
+        <header className="header">
+          <div className="header-text">
+            <h1>US Trip Planner</h1>
+            <p className="subtitle">New York & Washington DC</p>
+          </div>
+        </header>
+        <div className="user-bar user-bar-prompt">
+          <p className="user-bar-title">Who are you?</p>
+          <p className="user-bar-hint">Pick your name before rating things — Arthur rates separately from Dad.</p>
+          <div className="user-bar-buttons">
+            <button className="user-bar-btn arthur" onClick={() => selectUser("arthur")}>
+              Arthur
+            </button>
+            <button className="user-bar-btn dad" onClick={() => selectUser("dad")}>
+              Dad
+            </button>
+          </div>
         </div>
+        <p className="empty-state">Choose Arthur or Dad above to get started.</p>
       </div>
     );
   }
@@ -209,11 +223,30 @@ export default function App() {
       return 0;
     });
 
-  const ratedByMe = cityItems.filter((i) => (i.rating_me ?? 0) > 0).length;
+  const ratedByArthur = cityItems.filter((i) => (i.rating_me ?? 0) > 0).length;
   const ratedByDad = cityItems.filter((i) => (i.rating_dad ?? 0) > 0).length;
 
   return (
     <div className="app">
+      <div className="user-bar">
+        <span className="user-bar-label">Rating as:</span>
+        <button
+          className={`user-bar-btn arthur ${currentUser === "arthur" ? "active" : ""}`}
+          onClick={() => selectUser("arthur")}
+        >
+          Arthur
+        </button>
+        <button
+          className={`user-bar-btn dad ${currentUser === "dad" ? "active" : ""}`}
+          onClick={() => selectUser("dad")}
+        >
+          Dad
+        </button>
+        <span className="user-bar-note">
+          Tap to switch — you can only change your own stars
+        </span>
+      </div>
+
       <header className="header">
         <div className="header-content">
           <div className="header-text">
@@ -221,34 +254,19 @@ export default function App() {
             <p className="subtitle">New York & Washington DC with Dad</p>
           </div>
           <div className="header-actions">
-            <div className="user-switcher">
-              <span className="user-switcher-label">You are:</span>
-              <button
-                className={`user-chip ${currentUser === "me" ? "active" : ""}`}
-                onClick={() => selectUser("me")}
-              >
-                Me
-              </button>
-              <button
-                className={`user-chip ${currentUser === "dad" ? "active" : ""}`}
-                onClick={() => selectUser("dad")}
-              >
-                Dad
-              </button>
-            </div>
             <button className="share-btn" onClick={() => copyLink(true)}>
               {copied ? "✓ Link copied!" : "📋 Share with Dad"}
             </button>
           </div>
         </div>
         <p className="share-hint">
-          You are rating as <strong>{currentUser === "me" ? "Me" : "Dad"}</strong> — send Dad the link and ask him to pick "Dad" when he opens it.
+          Send Dad the link — he should tap <strong>Dad</strong> in the bar at the top.
         </p>
       </header>
 
       {mutualFives.length > 0 && (
         <section className="mutual-section">
-          <h2>⭐ You both gave 5 stars</h2>
+          <h2>⭐ Arthur & Dad both gave 5 stars</h2>
           <p className="mutual-subtitle">{CITIES[city].label} — definite must-dos</p>
           <div className="mutual-list">
             {mutualFives.map((item) => (
@@ -291,8 +309,8 @@ export default function App() {
           <span className="stat-label">ideas</span>
         </div>
         <div className="stat">
-          <span className="stat-num">{ratedByMe}</span>
-          <span className="stat-label">rated by me</span>
+          <span className="stat-num">{ratedByArthur}</span>
+          <span className="stat-label">rated by arthur</span>
         </div>
         <div className="stat">
           <span className="stat-num">{ratedByDad}</span>

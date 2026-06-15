@@ -52,12 +52,12 @@ export default function ItemCard({
       </div>
 
       <div className="item-ratings">
-        <div className={`rating-row ${currentUser === "me" ? "active-user" : ""}`}>
-          <span className="rating-person">Me</span>
+        <div className={`rating-row ${currentUser === "arthur" ? "active-user" : ""}`}>
+          <span className="rating-person">Arthur</span>
           <StarRating
             value={meRating}
-            onChange={(r) => onRate(item.id, "me", r)}
-            disabled={currentUser !== "me"}
+            onChange={(r) => onRate(item.id, "arthur", r)}
+            disabled={currentUser !== "arthur"}
           />
         </div>
         <div className={`rating-row ${currentUser === "dad" ? "active-user" : ""}`}>

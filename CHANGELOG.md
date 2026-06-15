@@ -6,7 +6,7 @@
 
 ## 2026-06-15
 
-- Added separate star ratings for Me and Dad, with a top section showing items you both rated 5 stars.
+- Renamed Me to Arthur and added a permanent Arthur/Dad picker bar at the top of the page.
 
 ## 2026-06-15
 
