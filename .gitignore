@@ -1,0 +1,5 @@
+node_modules/
+dist/
+server/trips.db
+.DS_Store
+*.log
