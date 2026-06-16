@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import AddItemForm from "./components/AddItemForm";
 import ItemCard from "./components/ItemCard";
+import {
+  clearTripId,
+  getPendingRatingSyncs,
+  getSavedTripId,
+  mergeLocalRatings,
+  saveLocalRating,
+  saveTripId
+} from "./tripStorage";
 
 const CITIES = {
   "new-york": { label: "New York", emoji: "🗽" },
@@ -23,16 +31,23 @@ function setTripIdInUrl(id) {
   const url = new URL(window.location.href);
   url.searchParams.set("trip", id);
   window.history.replaceState({}, "", url);
+  saveTripId(id);
 }
 
 function normalizeUser(stored) {
-  if (!stored || stored === "me") return null;
+  if (!stored) return null;
+  if (stored === "me") return "arthur";
   if (stored === "arthur" || stored === "dad") return stored;
   return null;
 }
 
 function getStoredUser() {
-  return normalizeUser(localStorage.getItem("tripUser"));
+  const stored = localStorage.getItem("tripUser");
+  const user = normalizeUser(stored);
+  if (stored === "me" && user === "arthur") {
+    localStorage.setItem("tripUser", "arthur");
+  }
+  return user;
 }
 
 function storeUser(user) {
@@ -56,10 +71,31 @@ export default function App() {
       const res = await fetch(`/api/trips/${id}`);
       if (!res.ok) throw new Error("Trip not found");
       const data = await res.json();
-      setTrip(data);
+      const mergedItems = mergeLocalRatings(id, data.items);
+      setTrip({ ...data, items: mergedItems });
       setError(null);
+      saveTripId(id);
+      setTripIdInUrl(id);
+
+      const pending = getPendingRatingSyncs(id, data.items);
+      for (const sync of pending) {
+        await fetch(`/api/trips/${id}/items/${sync.itemId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rating: sync.rating, user: sync.user })
+        });
+      }
+      if (pending.length > 0) {
+        const refresh = await fetch(`/api/trips/${id}`);
+        if (refresh.ok) {
+          const fresh = await refresh.json();
+          setTrip({ ...fresh, items: mergeLocalRatings(id, fresh.items) });
+        }
+      }
+      return true;
     } catch {
       setError("Could not load trip. The link may be invalid.");
+      return false;
     }
   }, []);
 
@@ -83,9 +119,16 @@ export default function App() {
 
   useEffect(() => {
     async function init() {
-      const id = getTripIdFromUrl();
-      if (id) {
-        await loadTrip(id);
+      const urlTrip = getTripIdFromUrl();
+      const savedTrip = getSavedTripId();
+      const tripId = urlTrip || savedTrip;
+
+      if (tripId) {
+        const loaded = await loadTrip(tripId);
+        if (!loaded && savedTrip && !urlTrip) {
+          clearTripId();
+          await createTrip();
+        }
       } else {
         await createTrip();
       }
@@ -108,6 +151,16 @@ export default function App() {
   }
 
   async function updateRating(itemId, user, rating) {
+    saveLocalRating(trip.id, itemId, user, rating);
+    setTrip((prev) => ({
+      ...prev,
+      items: prev.items.map((i) => {
+        if (i.id !== itemId) return i;
+        const field = user === "dad" ? "rating_dad" : "rating_me";
+        return { ...i, [field]: rating };
+      })
+    }));
+
     const res = await fetch(`/api/trips/${trip.id}/items/${itemId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -260,7 +313,7 @@ export default function App() {
           </div>
         </div>
         <p className="share-hint">
-          Send Dad the link — he should tap <strong>Dad</strong> in the bar at the top.
+          Bookmark this page to keep your ratings — send Dad the same link and he should tap <strong>Dad</strong> above.
         </p>
       </header>
 

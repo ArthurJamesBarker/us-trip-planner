@@ -6,7 +6,7 @@
 
 ## 2026-06-15
 
-- Expanded seed list with 60+ more sights, museums, activities, and restaurants for NYC and DC.
+- Fixed ratings disappearing by remembering your trip in the browser and backing up stars locally.
 
 ## 2026-06-15
 
