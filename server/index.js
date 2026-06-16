@@ -64,6 +64,28 @@ function seedTrip(tripId) {
   insertMany(seedItems);
 }
 
+function backfillSeedItems(tripId) {
+  const existing = db
+    .prepare("SELECT name, city FROM items WHERE trip_id = ?")
+    .all(tripId);
+  const existingSet = new Set(existing.map((i) => `${i.city}:${i.name}`));
+
+  const insert = db.prepare(`
+    INSERT INTO items (id, trip_id, city, category, name, cost, location, duration, description, is_custom)
+    VALUES (@id, @tripId, @city, @category, @name, @cost, @location, @duration, @description, 0)
+  `);
+
+  const insertMissing = db.transaction((items) => {
+    for (const item of items) {
+      if (!existingSet.has(`${item.city}:${item.name}`)) {
+        insert.run({ ...item, id: nanoid(10), tripId });
+      }
+    }
+  });
+
+  insertMissing(seedItems);
+}
+
 app.post("/api/trips", (req, res) => {
   const id = nanoid(8);
   const name = req.body?.name || "Our US Trip";
@@ -75,6 +97,8 @@ app.post("/api/trips", (req, res) => {
 app.get("/api/trips/:id", (req, res) => {
   const trip = db.prepare("SELECT * FROM trips WHERE id = ?").get(req.params.id);
   if (!trip) return res.status(404).json({ error: "Trip not found" });
+
+  backfillSeedItems(req.params.id);
 
   const items = db
     .prepare("SELECT * FROM items WHERE trip_id = ? ORDER BY city, category, name")

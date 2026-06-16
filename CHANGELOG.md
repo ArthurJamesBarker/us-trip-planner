@@ -6,7 +6,7 @@
 
 ## 2026-06-15
 
-- Renamed Me to Arthur and added a permanent Arthur/Dad picker bar at the top of the page.
+- Expanded seed list with 60+ more sights, museums, activities, and restaurants for NYC and DC.
 
 ## 2026-06-15
 
